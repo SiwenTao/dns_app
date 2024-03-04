@@ -1,0 +1,43 @@
+Fibonacci Service with Docker
+
+This project sets up a microservice architecture using Docker, consisting of three main services:
+
+    Authoritative Server (AS): Manages DNS-like registration and resolution for services.
+    Fibonacci Server (FS): Calculates Fibonacci numbers.
+    User Server (US): Acts as an interface for users to request Fibonacci numbers, resolving service addresses via the AS.
+
+Architecture Overview
+
+    The Fibonacci Server (FS) registers its service address with the Authoritative Server (AS) at startup.
+    The User Server (US) receives HTTP GET requests from clients, asking for the nth Fibonacci number.
+    US queries the AS to resolve the FS's address.
+    US requests the nth Fibonacci number from FS.
+    FS calculates and returns the Fibonacci number to US, which then responds to the client.
+
+Requirements
+
+    Docker
+    Python 3.9 or higher
+    Flask for creating the HTTP servers
+    Requests library for HTTP requests between services
+
+Setup
+    Build Docker Images
+    Navigate to the root directory of the project and build Docker images for each service:
+
+        docker build -t authoritative-server ./AS
+        docker build -t fibonacci-server ./FS
+        docker build -t user-server ./US
+
+    Create a Docker Network
+    Create a Docker network to facilitate communication between containers:
+        docker network create fibonacci-net
+
+        docker run --network=fibonacci-net --name as -d authoritative-server
+        docker run --network=fibonacci-net --name fs -d fibonacci-server
+        docker run --network=fibonacci-net --name us -p 8080:8080 -d user-server
+
+    Usage
+    Request the nth Fibonacci number via the User Server using curl or a web browser:
+        curl "http://localhost:8080/fibonacci?hostname=fibonacci.com&number=10&as_ip=as&as_port=53533"
+
